@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>社区开门监控</title>
+<style>
+:root{color-scheme:light;--bg:#fff0f3;--bg2:#fad8df;--card:#fff;--ink:#5a3a46;--mute:#9b7482;--line:#fad8df;--pink:#f29db0;--accent:#d95f7e;--accent-ink:#fff;--ok:#2f9d73;--okbg:#e3f6ec;--bad:#d6455d;--badbg:#ffe3e8;--cl:#a0687a;--clbg:#fde7ec;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;color:var(--ink);font:16px/1.65 -apple-system,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;background:radial-gradient(circle at 12% 0%,var(--bg2) 0,transparent 42%),radial-gradient(circle at 100% 30%,#ffe6ec 0,transparent 38%),var(--bg)}
+main{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:18px 16px 56px}
+.hero{display:flex;align-items:center;gap:12px;margin:4px 0 18px}
+.hero .cat{width:64px;height:64px;flex:none}
+.hero h1{font-size:26px;line-height:1.25;margin:0;color:var(--accent);letter-spacing:.04em}
+.hero p{margin:2px 0 0;color:var(--mute);font-size:14px}
+.hero .ghost{width:52px;height:52px;margin-left:auto;flex:none;animation:float 3.6s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+section{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;margin-bottom:16px;box-shadow:0 6px 18px rgba(242,157,176,.16)}
+h2{display:flex;align-items:center;gap:6px;font-size:17px;margin:0 0 10px;color:var(--ink)}
+h2 svg{width:20px;height:20px;flex:none}
+input{font:inherit;font-size:15px;color:var(--ink);background:#fff8fa;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;width:100%}
+input::placeholder{color:#c9a3af}
+button{font:inherit;font-size:14px;border:1.5px solid var(--line);background:#fff;color:var(--accent);border-radius:12px;padding:8px 14px;cursor:pointer}
+button.p{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:8px;margin-top:10px}
+.row input{flex:1;min-width:0}
+.item{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1.5px dashed var(--line)}
+.item:first-of-type{border-top:0}
+.item .t{flex:1;min-width:0}
+.item .t b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item button{flex:none;white-space:nowrap}
+.item .t small{color:var(--mute);font-size:12px}
+.chip{font-size:13px;padding:3px 11px;border-radius:99px;white-space:nowrap;background:var(--clbg);color:var(--cl)}
+.chip.open{background:var(--okbg);color:var(--ok);font-weight:700}
+.chip.invalid{background:var(--badbg);color:var(--bad)}
+.hint{color:var(--mute);font-size:13px;margin:8px 0 0}
+.empty{text-align:center;padding:10px 0 4px;color:var(--mute)}
+.empty .mini{width:72px;height:72px}
+.empty p{margin:4px 0 0;font-size:14px}
+#msg{position:sticky;top:8px;z-index:5;padding:10px 14px;border-radius:14px;margin-bottom:12px;display:none;font-size:14px;box-shadow:0 4px 14px rgba(242,157,176,.25)}
+#msg.ok{display:block;background:var(--okbg);color:var(--ok)}
+#msg.err{display:block;background:var(--badbg);color:var(--bad)}
+label{font-size:13px;color:var(--mute);display:block;margin:10px 0 4px}
+details summary{cursor:pointer;font-weight:700;color:var(--accent)}
+.petals{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.petals i{position:absolute;top:-30px;left:var(--x);width:var(--s);height:var(--s);background:#f9c3d0;border-radius:150% 0 150% 0;opacity:.7;animation:fall var(--d) linear var(--delay) infinite}
+@keyframes fall{0%{transform:translate3d(0,-30px,0) rotate(0)}100%{transform:translate3d(60px,110vh,0) rotate(400deg)}}
+@media (prefers-reduced-motion:reduce){.petals{display:none}.hero .ghost{animation:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="cat" viewBox="0 0 64 64">
+      <path d="M12 30 L12 8 L28 19 Z" fill="#fff" stroke="#f29db0" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M52 30 L52 8 L36 19 Z" fill="#fff" stroke="#f29db0" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M16 24 L16 14 L23 19 Z" fill="#fad8df"/>
+      <path d="M48 24 L48 14 L41 19 Z" fill="#fad8df"/>
+      <ellipse cx="32" cy="38" rx="22" ry="18" fill="#fff" stroke="#f29db0" stroke-width="2.5"/>
+      <circle cx="24" cy="37" r="2.6" fill="#5a3a46"/>
+      <circle cx="40" cy="37" r="2.6" fill="#5a3a46"/>
+      <ellipse cx="18" cy="43" rx="4" ry="2.6" fill="#fad8df"/>
+      <ellipse cx="46" cy="43" rx="4" ry="2.6" fill="#fad8df"/>
+      <path d="M30 42 L34 42 L32 44.5 Z" fill="#f29db0"/>
+      <path d="M32 44.5 Q32 47.5 28.5 47.5 M32 44.5 Q32 47.5 35.5 47.5" fill="none" stroke="#5a3a46" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M9 40 L16 41 M9 46 L16 44 M55 40 L48 41 M55 46 L48 44" stroke="#f29db0" stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="ghost" viewBox="0 0 64 64">
+      <path d="M12 56 V28 C12 15 21 7 32 7 C43 7 52 15 52 28 V56 L45.5 51 L39 56 L32.5 51 L26 56 L19.5 51 Z" fill="#fff" stroke="#f29db0" stroke-width="2.5" stroke-linejoin="round"/>
+      <circle cx="25" cy="30" r="2.8" fill="#5a3a46"/>
+      <circle cx="39" cy="30" r="2.8" fill="#5a3a46"/>
+      <ellipse cx="20.5" cy="37" rx="3.6" ry="2.4" fill="#fad8df"/>
+      <ellipse cx="43.5" cy="37" rx="3.6" ry="2.4" fill="#fad8df"/>
+      <path d="M29 37 Q32 40.5 35 37" fill="none" stroke="#5a3a46" stroke-width="1.6" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="sakura" viewBox="-30 -30 60 60">
+      <g fill="#f9c3d0" stroke="#f29db0" stroke-width="1.5" stroke-linejoin="round">
+        <path id="pt" d="M0 0 C-10 -6 -10 -22 -3.5 -27 L0 -23 L3.5 -27 C10 -22 10 -6 0 0 Z"/>
+        <use href="#pt" transform="rotate(72)"/>
+        <use href="#pt" transform="rotate(144)"/>
+        <use href="#pt" transform="rotate(216)"/>
+        <use href="#pt" transform="rotate(288)"/>
+      </g>
+      <circle r="3" fill="#e56f8f"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="petals" aria-hidden="true">
+  <i style="--x:6%;--s:12px;--d:14s;--delay:0s"></i>
+  <i style="--x:20%;--s:9px;--d:18s;--delay:-6s"></i>
+  <i style="--x:34%;--s:14px;--d:16s;--delay:-3s"></i>
+  <i style="--x:48%;--s:10px;--d:20s;--delay:-11s"></i>
+  <i style="--x:62%;--s:13px;--d:15s;--delay:-8s"></i>
+  <i style="--x:76%;--s:9px;--d:19s;--delay:-2s"></i>
+  <i style="--x:88%;--s:12px;--d:17s;--delay:-13s"></i>
+  <i style="--x:95%;--s:10px;--d:21s;--delay:-5s"></i>
+</div>
+
+<main>
+<header class="hero">
+  <svg class="cat" viewBox="0 0 64 64" role="img" aria-label="小猫"><use href="#cat"/></svg>
+  <div>
+    <h1>社区开门监控</h1>
+    <p>小猫守着门，开了就叫你</p>
+  </div>
+  <svg class="ghost" viewBox="0 0 64 64" role="img" aria-label="小幽灵"><use href="#ghost"/></svg>
+</header>
+<div id="msg" role="status"></div>
+
+<section>
+  <details id="setup">
+    <summary>连接设置</summary>
+    <label for="repo">GitHub 仓库（格式：用户名/仓库名）</label>
+    <input id="repo" placeholder="yourname/discord-monitor" autocapitalize="none">
+    <label for="token">访问令牌（只保存在这台设备的浏览器里）</label>
+    <input id="token" type="password" placeholder="github_pat_..." autocapitalize="none">
+    <div class="row"><button class="p" id="saveCfg">保存设置</button></div>
+  </details>
+</section>
+
+<section>
+  <h2><svg viewBox="-30 -30 60 60" aria-hidden="true"><use href="#sakura"/></svg>监控的社区</h2>
+  <div id="comms"><p class="hint">加载中…</p></div>
+  <div class="row"><input id="inv" placeholder="粘贴邀请链接，如 https://discord.gg/xxxx" autocapitalize="none"><button class="p" id="addC">添加</button></div>
+  <p class="hint">状态会在添加后显示。程序每分钟自动检查，状态变化时发邮件。</p>
+  <div class="row"><button id="refresh">刷新状态</button></div>
+</section>
+
+<section>
+  <h2><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#ghost"/></svg>接收提醒的邮箱</h2>
+  <div id="mails"></div>
+  <div class="row"><input id="mail" type="email" placeholder="name@example.com" autocapitalize="none"><button class="p" id="addM">添加</button></div>
+  <p class="hint">邮箱经加密后存到 GitHub 的加密存放处，不会公开。名单只记在这台设备上，换设备需重新输入。</p>
+</section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/libsodium-wrappers@0.7.13/dist/browsers/sodium.js"></script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+function lsGet(k,d){try{var v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function msg(t,ok){var m=$("msg");m.textContent=t;m.className=ok?"ok":"err";clearTimeout(msg.t);msg.t=setTimeout(function(){m.className=""},6000)}
+
+var cfg=lsGet("cfg",null)||{repo:"",token:""};
+if(!cfg.repo&&/\.github\.io$/.test(location.hostname)){
+  var seg=location.pathname.split("/").filter(Boolean)[0];
+  if(seg)cfg.repo=location.hostname.split(".")[0]+"/"+seg;
+}
+$("repo").value=cfg.repo||"";$("token").value=cfg.token||"";
+if(!cfg.repo||!cfg.token)$("setup").open=true;
+$("saveCfg").onclick=function(){
+  cfg={repo:$("repo").value.trim(),token:$("token").value.trim()};
+  lsSet("cfg",cfg);msg("设置已保存",true);loadAll();
+};
+
+function gh(path,opt){
+  opt=opt||{};
+  opt.headers=Object.assign({"Authorization":"Bearer "+cfg.token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"},opt.headers||{});
+  return fetch("https://api.github.com/repos/"+cfg.repo+path,opt);
+}
+function b64ToStr(b){var bin=atob(b.replace(/\s/g,""));var u=Uint8Array.from(bin,function(c){return c.charCodeAt(0)});return new TextDecoder().decode(u)}
+function strToB64(s){var u=new TextEncoder().encode(s),bin="";u.forEach(function(c){bin+=String.fromCharCode(c)});return btoa(bin)}
+async function getFile(name){
+  var r=await gh("/contents/"+name+"?t="+Date.now());
+  if(r.status===404)return null;
+  if(!r.ok)throw new Error("读取 "+name+" 失败（"+r.status+"），请检查仓库名和令牌权限");
+  var j=await r.json();
+  return {data:JSON.parse(b64ToStr(j.content)),sha:j.sha};
+}
+async function putFile(name,obj,sha,note){
+  var body={message:note,content:strToB64(JSON.stringify(obj,null,2)+"\n")};
+  if(sha)body.sha=sha;
+  var r=await gh("/contents/"+name,{method:"PUT",body:JSON.stringify(body)});
+  if(!r.ok)throw new Error("保存失败（"+r.status+"），令牌需要有仓库内容的读写权限");
+}
+
+function codeOf(s){
+  s=s.trim();
+  var m=s.match(/(?:discord\.gg|discord\.com\/invite|discordapp\.com\/invite)\/([A-Za-z0-9-_]+)/i);
+  if(m)return m[1];
+  return /^[A-Za-z0-9-_]+$/.test(s)?s:null;
+}
+async function live(code){
+  try{
+    var r=await fetch("https://discord.com/api/v10/invites/"+encodeURIComponent(code)+"?with_counts=true");
+    if(r.status===404)return {status:"invalid"};
+    if(!r.ok)return null;
+    var j=await r.json();
+    var f=(j.guild&&j.guild.features)||[];
+    return {status:f.indexOf("INVITES_DISABLED")>=0?"closed":"open",name:j.guild&&j.guild.name};
+  }catch(e){return null}
+}
+
+var comms=[],states={},liveSt={};
+var LABEL={open:"开门中",closed:"关门",invalid:"链接失效"};
+function renderComms(){
+  var el=$("comms");
+  if(!comms.length){el.innerHTML='<div class="empty"><svg class="mini" viewBox="0 0 64 64" aria-hidden="true"><use href="#cat"/></svg><p>还没有社区，粘贴邀请链接让小猫帮你守门。</p></div>';return}
+  el.innerHTML=comms.map(function(c,i){
+    var code=codeOf(c.invite)||"";
+    var st=liveSt[code]||states[code];
+    var chip=st?'<span class="chip '+st+'">'+LABEL[st]+'</span>':'<span class="chip">等待检查</span>';
+    return '<div class="item"><div class="t"><b>'+esc(c.name||code)+'</b><small>'+esc(code)+'</small></div>'+chip+'<button data-c="'+i+'" aria-label="复制链接">复制链接</button><button data-i="'+i+'" aria-label="删除">删除</button></div>';
+  }).join("");
+}
+async function loadAll(){
+  if(!cfg.repo||!cfg.token){$("comms").innerHTML='<p class="hint">先在上方“连接设置”填好仓库和令牌。</p>';return}
+  try{
+    var f=await getFile("communities.json");comms=f?f.data:[];
+    var s=await getFile("state.json");states=s?s.data:{};
+    liveSt={};renderComms();
+    await Promise.all(comms.map(async function(c){
+      var code=codeOf(c.invite);if(!code)return;
+      var r=await live(code);if(r){liveSt[code]=r.status}
+    }));
+    renderComms();
+  }catch(e){msg(e.message,false)}
+}
+$("refresh").onclick=function(){loadAll()};
+
+$("addC").onclick=async function(){
+  var code=codeOf($("inv").value);
+  if(!code){msg("看不懂这个链接，请粘贴 discord.gg/… 形式的邀请链接",false);return}
+  if(!cfg.repo||!cfg.token){msg("请先填写连接设置",false);return}
+  try{
+    var f=await getFile("communities.json");
+    var list=f?f.data:[];
+    if(list.some(function(x){return codeOf(x.invite)===code})){msg("这个社区已经在名单里了",false);return}
+    var r=await live(code);
+    var name=(r&&r.name)||code;
+    list.push({name:name,invite:"https://discord.gg/"+code});
+    await putFile("communities.json",list,f&&f.sha,"add "+code);
+    $("inv").value="";comms=list;if(r)liveSt[code]=r.status;renderComms();
+    msg(r?("已添加「"+name+"」，当前："+LABEL[r.status]):"已添加，稍后自动检查并显示状态",true);
+  }catch(e){msg(e.message,false)}
+};
+function copyText(t){
+  if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(t);
+  return new Promise(function(res,rej){
+    var a=document.createElement("textarea");a.value=t;a.style.cssText="position:fixed;opacity:0";
+    document.body.appendChild(a);a.select();
+    try{document.execCommand("copy")?res():rej()}catch(e){rej(e)}
+    document.body.removeChild(a);
+  });
+}
+$("comms").addEventListener("click",function(e){
+  var c=e.target.getAttribute&&e.target.getAttribute("data-c");
+  if(c==null)return;
+  var link="https://discord.gg/"+codeOf(comms[+c].invite);
+  copyText(link).then(function(){
+    msg("已复制："+link,true);
+    var b=e.target,old=b.textContent;b.textContent="已复制 ✓";setTimeout(function(){b.textContent=old},1500);
+  },function(){msg("复制失败，请长按手动复制："+link,false)});
+});
+$("comms").addEventListener("click",async function(e){
+  var i=e.target.getAttribute&&e.target.getAttribute("data-i");
+  if(i==null)return;
+  try{
+    var f=await getFile("communities.json");var list=f?f.data:[];
+    var code=codeOf(comms[+i].invite);
+    list=list.filter(function(x){return codeOf(x.invite)!==code});
+    await putFile("communities.json",list,f&&f.sha,"remove "+code);
+    comms=list;renderComms();msg("已删除",true);
+  }catch(err){msg(err.message,false)}
+});
+
+var mails=lsGet("mails",[]);
+function renderMails(){
+  $("mails").innerHTML=mails.length?mails.map(function(m,i){
+    return '<div class="item"><div class="t"><b>'+esc(m)+'</b></div><button data-m="'+i+'">删除</button></div>';
+  }).join(""):'<p class="hint">还没有邮箱。</p>';
+}
+async function saveSecret(){
+  if(!window.sodium){throw new Error("加密组件加载失败，请检查网络后刷新页面")}
+  if(!mails.length){throw new Error("名单是空的，没有写入。请至少保留一个邮箱")}
+  await sodium.ready;
+  var kr=await gh("/actions/secrets/public-key");
+  if(!kr.ok)throw new Error("获取加密公钥失败（"+kr.status+"），令牌需要“Secrets”读写权限");
+  var k=await kr.json();
+  var enc=sodium.crypto_box_seal(sodium.from_string(mails.join(",")),sodium.from_base64(k.key,sodium.base64_variants.ORIGINAL));
+  var val=sodium.to_base64(enc,sodium.base64_variants.ORIGINAL);
+  var r=await gh("/actions/secrets/MAIL_TO",{method:"PUT",body:JSON.stringify({encrypted_value:val,key_id:k.key_id})});
+  if(!r.ok)throw new Error("写入邮箱失败（"+r.status+"）");
+}
+async function mailChanged(okText){
+  lsSet("mails",mails);renderMails();
+  if(!cfg.repo||!cfg.token){msg("请先填写连接设置",false);return}
+  try{await saveSecret();msg(okText,true)}catch(e){msg(e.message,false)}
+}
+$("addM").onclick=function(){
+  var v=$("mail").value.trim();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){msg("邮箱格式不对",false);return}
+  if(mails.indexOf(v)>=0){msg("这个邮箱已经在名单里了",false);return}
+  mails.push(v);$("mail").value="";mailChanged("邮箱已加密保存到 GitHub");
+};
+$("mails").addEventListener("click",function(e){
+  var i=e.target.getAttribute&&e.target.getAttribute("data-m");
+  if(i==null)return;
+  mails.splice(+i,1);mailChanged("名单已更新");
+});
+
+renderMails();loadAll();
+})();
+</script>
+</body>
+</html>
