@@ -28,6 +28,9 @@ jobs:
       MAIL_TO: ${{ secrets.MAIL_TO }}
       LOOP_SECONDS: "3300"
       INTERVAL_SECONDS: "20"
+      GROWTH_N: "5"
+      GROWTH_WINDOW: "120"
+      GROWTH_COOLDOWN: "600"
     steps:
       - uses: actions/checkout@v4
       - name: 发测试邮件
