@@ -1,14 +1,7 @@
 [
-  {
-    "name": "旅程ΟΡΙΖΟΝΤΑΣ",
-    "invite": "https://discord.gg/elysianhorizon"
-  },
-  {
-    "name": "puppyboo",
-    "invite": "https://discord.gg/puppyboo"
-  {
-  "name": "Lorelie",
-  "invite": "https://discord.gg/d8dW5p3t4",
-  "watch_order": true
-  }
+  {"name": "旅程ΟΡΙΖΟΝΤΑΣ", "invite": "https://discord.gg/elysianhorizon"},
+  {"name": "puppyboo", "invite": "https://discord.gg/puppyboo"},
+  {"name": "TvenmeVWKd", "invite": "https://discord.gg/TvenmeVWKd"},
+  {"name": "类脑ΟΔΥΣΣΕΙΑ", "invite": "https://discord.gg/odysseia"},
+  {"name": "Lorelie", "invite": "https://discord.gg/d8dW5p3t4", "watch_order": true}
 ]
